@@ -1,26 +1,44 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { updateForm } from './slices/formSlice';
+import { useAppDispatch, useAppSelector } from './store';
 
-function App() {
+export const App: React.FC = () => {
+  const dispatch = useAppDispatch();
+
+  const formState = useAppSelector((state) => state.form);
+
+  const handleFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    dispatch(updateForm({ [e.target.name]: e.target.value }));
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <input
+        placeholder='First Name'
+        value={formState.firstName}
+        name='firstName'
+        onChange={handleFieldChange}
+      />
+      <input
+        placeholder='Last Name'
+        value={formState.lastName}
+        name='lastName'
+        onChange={handleFieldChange}
+      />
+      <input
+        placeholder='Email'
+        value={formState.email}
+        name='email'
+        onChange={handleFieldChange}
+      />
+      <textarea
+        placeholder='Message'
+        value={formState.message}
+        name='message'
+        onChange={handleFieldChange}
+      />
     </div>
   );
-}
-
-export default App;
+};
