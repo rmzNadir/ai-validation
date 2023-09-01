@@ -1,0 +1,1739 @@
+I've got this react component:
+
+import React from 'react';
+import { updateForm } from './slices/formSlice';
+import { useAppDispatch, useAppSelector } from './store';
+
+export const App: React.FC = () => {
+  const dispatch = useAppDispatch();
+
+  const formState = useAppSelector((state) => state.form);
+
+  const handleFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    dispatch(updateForm({ [e.target.name]: e.target.value }));
+  };
+
+  return (
+    <div>
+      <input
+        placeholder='First Name'
+        value={formState.firstName}
+        name='firstName'
+        onChange={handleFieldChange}
+      />
+      <input
+        placeholder='Last Name'
+        value={formState.lastName}
+        name='lastName'
+        onChange={handleFieldChange}
+      />
+      <input
+        placeholder='Email'
+        value={formState.email}
+        name='email'
+        onChange={handleFieldChange}
+      />
+      <textarea
+        placeholder='Message'
+        value={formState.message}
+        name='message'
+        onChange={handleFieldChange}
+      />
+    </div>
+  );
+};
+
+Please update it to use semantic HTML for the form and also use the "validator" npm library to check that when the form is submitted the firstName and lastName fields are not empty, the email field should be an email and that the message field has at least 10 characters, please disable the submit button if at least 1 of this conditions isn't met
+ChatGPT
+Certainly! You can use semantic HTML elements like <form>, <label>, and <fieldset> to make your form more meaningful. Additionally, you can use the validator library to validate the fields as per your requirements.
+
+Here's an updated version of your App component that accomplishes these goals:
+
+jsx
+Copy code
+import React, { useState } from 'react';
+import { updateForm } from './slices/formSlice';
+import { useAppDispatch, useAppSelector } from './store';
+import validator from 'validator';
+
+export const App: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const formState = useAppSelector((state) => state.form);
+  
+  const [isValid, setIsValid] = useState({
+    firstName: false,
+    lastName: false,
+    email: false,
+    message: false,
+  });
+
+  const validateForm = () => {
+    setIsValid({
+      firstName: formState.firstName !== '',
+      lastName: formState.lastName !== '',
+      email: validator.isEmail(formState.email),
+      message: formState.message.length >= 10,
+    });
+  };
+
+  const isFormValid = () => {
+    return isValid.firstName && isValid.lastName && isValid.email && isValid.message;
+  };
+
+  const handleFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    dispatch(updateForm({ [e.target.name]: e.target.value }));
+    validateForm();
+  };
+
+  return (
+    <form>
+      <fieldset>
+        <div>
+          <label htmlFor="firstName">First Name</label>
+          <input
+            id="firstName"
+            placeholder="First Name"
+            value={formState.firstName}
+            name="firstName"
+            onChange={handleFieldChange}
+          />
+        </div>
+        <div>
+          <label htmlFor="lastName">Last Name</label>
+          <input
+            id="lastName"
+            placeholder="Last Name"
+            value={formState.lastName}
+            name="lastName"
+            onChange={handleFieldChange}
+          />
+        </div>
+        <div>
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            placeholder="Email"
+            value={formState.email}
+            name="email"
+            onChange={handleFieldChange}
+          />
+        </div>
+        <div>
+          <label htmlFor="message">Message</label>
+          <textarea
+            id="message"
+            placeholder="Message"
+            value={formState.message}
+            name="message"
+            onChange={handleFieldChange}
+          />
+        </div>
+        <div>
+          <button type="submit" disabled={!isFormValid()}>
+            Submit
+          </button>
+        </div>
+      </fieldset>
+    </form>
+  );
+};
+Here’s a breakdown of what’s happening:
+
+I added a useState to manage a isValid state variable that keeps track of the validity of each field.
+I added a validateForm function to update the isValid state based on the requirements for each field. This function is called every time a field changes.
+I modified the form elements to be wrapped in <form> and <fieldset> tags and added <label> tags for each input for semantic clarity.
+The submit button is disabled if the isFormValid function returns false.
+Don’t forget to install the validator npm package by running npm install validator if you haven't already.
+
+I've made the following changes:
+
+import React, { useState } from 'react';
+import { updateForm } from './slices/formSlice';
+import { useAppDispatch, useAppSelector } from './store';
+import isEmail from 'validator/es/lib/isEmail';
+import isEmpty from 'validator/es/lib/isEmpty';
+import isLength from 'validator/es/lib/isLength';
+
+export const App: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const formState = useAppSelector((state) => state.form);
+
+  const [isValid, setIsValid] = useState({
+    firstName: false,
+    lastName: false,
+    email: false,
+    message: false,
+  });
+
+  const validateForm = () => {
+    setIsValid({
+      firstName: !isEmpty(formState.lastName),
+      lastName: !isEmpty(formState.lastName),
+      email: isEmail(formState.email),
+      message: isLength(formState.message, { min: 10 }),
+    });
+  };
+
+  const isFormValid =
+    isValid.firstName && isValid.lastName && isValid.email && isValid.message;
+
+  const handleFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    dispatch(updateForm({ [e.target.name]: e.target.value }));
+    validateForm();
+  };
+
+  return (
+    <form>
+      <fieldset>
+        <div>
+          <label htmlFor='firstName'>First Name</label>
+          <input
+            id='firstName'
+            placeholder='First Name'
+            value={formState.firstName}
+            name='firstName'
+            onChange={handleFieldChange}
+          />
+        </div>
+        <div>
+          <label htmlFor='lastName'>Last Name</label>
+          <input
+            id='lastName'
+            placeholder='Last Name'
+            value={formState.lastName}
+            name='lastName'
+            onChange={handleFieldChange}
+          />
+        </div>
+        <div>
+          <label htmlFor='email'>Email</label>
+          <input
+            id='email'
+            type='email'
+            placeholder='Email'
+            value={formState.email}
+            name='email'
+            onChange={handleFieldChange}
+          />
+        </div>
+        <div>
+          <label htmlFor='message'>Message</label>
+          <textarea
+            id='message'
+            placeholder='Message'
+            value={formState.message}
+            name='message'
+            onChange={handleFieldChange}
+          />
+        </div>
+        <div>
+          <button type='submit' disabled={!isFormValid}>
+            Submit
+          </button>
+        </div>
+      </fieldset>
+    </form>
+  );
+};
+
+
+Please update the validation code to be as simple as possible (perhaps don't use useState)
+ChatGPT
+Certainly! If you don't want to use useState to keep track of form validity, you can directly evaluate the conditions when disabling the submit button. The same can be done when you wish to submit the form or take some action based on its validity.
+
+Here's your updated component, simplified in terms of validation:
+
+jsx
+Copy code
+import React from 'react';
+import { updateForm } from './slices/formSlice';
+import { useAppDispatch, useAppSelector } from './store';
+import isEmail from 'validator/es/lib/isEmail';
+import isEmpty from 'validator/es/lib/isEmpty';
+import isLength from 'validator/es/lib/isLength';
+
+export const App: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const formState = useAppSelector((state) => state.form);
+
+  const isFormValid = (
+    !isEmpty(formState.firstName) &&
+    !isEmpty(formState.lastName) &&
+    isEmail(formState.email) &&
+    isLength(formState.message, { min: 10 })
+  );
+
+  const handleFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    dispatch(updateForm({ [e.target.name]: e.target.value }));
+  };
+
+  return (
+    <form>
+      <fieldset>
+        <div>
+          <label htmlFor='firstName'>First Name</label>
+          <input
+            id='firstName'
+            placeholder='First Name'
+            value={formState.firstName}
+            name='firstName'
+            onChange={handleFieldChange}
+          />
+        </div>
+        <div>
+          <label htmlFor='lastName'>Last Name</label>
+          <input
+            id='lastName'
+            placeholder='Last Name'
+            value={formState.lastName}
+            name='lastName'
+            onChange={handleFieldChange}
+          />
+        </div>
+        <div>
+          <label htmlFor='email'>Email</label>
+          <input
+            id='email'
+            type='email'
+            placeholder='Email'
+            value={formState.email}
+            name='email'
+            onChange={handleFieldChange}
+          />
+        </div>
+        <div>
+          <label htmlFor='message'>Message</label>
+          <textarea
+            id='message'
+            placeholder='Message'
+            value={formState.message}
+            name='message'
+            onChange={handleFieldChange}
+          />
+        </div>
+        <div>
+          <button type='submit' disabled={!isFormValid}>
+            Submit
+          </button>
+        </div>
+      </fieldset>
+    </form>
+  );
+};
+In this version, I've removed useState and the validateForm function. Instead, isFormValid is a boolean value that is evaluated each time the component renders. It checks the form's current state against your validation criteria. The submit button's disabled attribute then directly relies on this boolean value.
+
+please add any applicable aria-attributes or anything else that may improve accessibility
+ChatGPT
+Certainly! Accessibility can be improved by adding aria-* attributes and some other enhancements. Here's your component with those improvements:
+
+jsx
+Copy code
+import React from 'react';
+import { updateForm } from './slices/formSlice';
+import { useAppDispatch, useAppSelector } from './store';
+import isEmail from 'validator/es/lib/isEmail';
+import isEmpty from 'validator/es/lib/isEmpty';
+import isLength from 'validator/es/lib/isLength';
+
+export const App: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const formState = useAppSelector((state) => state.form);
+
+  const isFormValid = (
+    !isEmpty(formState.firstName) &&
+    !isEmpty(formState.lastName) &&
+    isEmail(formState.email) &&
+    isLength(formState.message, { min: 10 })
+  );
+
+  const handleFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    dispatch(updateForm({ [e.target.name]: e.target.value }));
+  };
+
+  return (
+    <form aria-labelledby="formTitle">
+      <h1 id="formTitle">Contact Form</h1>
+      <fieldset>
+        <div>
+          <label htmlFor='firstName'>First Name</label>
+          <input
+            id='firstName'
+            placeholder='First Name'
+            value={formState.firstName}
+            name='firstName'
+            onChange={handleFieldChange}
+            aria-required="true"
+          />
+        </div>
+        <div>
+          <label htmlFor='lastName'>Last Name</label>
+          <input
+            id='lastName'
+            placeholder='Last Name'
+            value={formState.lastName}
+            name='lastName'
+            onChange={handleFieldChange}
+            aria-required="true"
+          />
+        </div>
+        <div>
+          <label htmlFor='email'>Email</label>
+          <input
+            id='email'
+            type='email'
+            placeholder='Email'
+            value={formState.email}
+            name='email'
+            onChange={handleFieldChange}
+            aria-required="true"
+          />
+        </div>
+        <div>
+          <label htmlFor='message'>Message</label>
+          <textarea
+            id='message'
+            placeholder='Message'
+            value={formState.message}
+            name='message'
+            onChange={handleFieldChange}
+            aria-required="true"
+          />
+        </div>
+        <div>
+          <button
+            type='submit'
+            disabled={!isFormValid}
+            aria-disabled={!isFormValid}
+          >
+            Submit
+          </button>
+        </div>
+      </fieldset>
+    </form>
+  );
+};
+Changes and Enhancements
+Added aria-labelledby attribute to the form element and linked it to a title (<h1>) for the form to give it a clear name.
+Added aria-required="true" to all the input and textarea fields, marking them as required fields.
+Added aria-disabled to the submit button to indicate whether it is currently in a disabled state or not.
+These changes will improve the accessibility of your form.
+
+Refactor the code to destructure items from formState
+ChatGPT
+Certainly! You can destructure formState to make the code cleaner and easier to read. Here's how you can refactor your code:
+
+jsx
+Copy code
+import React from 'react';
+import { updateForm } from './slices/formSlice';
+import { useAppDispatch, useAppSelector } from './store';
+import isEmail from 'validator/es/lib/isEmail';
+import isEmpty from 'validator/es/lib/isEmpty';
+import isLength from 'validator/es/lib/isLength';
+
+export const App: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const { firstName, lastName, email, message } = useAppSelector((state) => state.form);
+
+  const isFormValid = (
+    !isEmpty(firstName) &&
+    !isEmpty(lastName) &&
+    isEmail(email) &&
+    isLength(message, { min: 10 })
+  );
+
+  const handleFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    dispatch(updateForm({ [e.target.name]: e.target.value }));
+  };
+
+  return (
+    <form aria-labelledby="formTitle">
+      <h1 id="formTitle">Contact Form</h1>
+      <fieldset>
+        <div>
+          <label htmlFor='firstName'>First Name</label>
+          <input
+            id='firstName'
+            placeholder='First Name'
+            value={firstName}
+            name='firstName'
+            onChange={handleFieldChange}
+            aria-required="true"
+          />
+        </div>
+        <div>
+          <label htmlFor='lastName'>Last Name</label>
+          <input
+            id='lastName'
+            placeholder='Last Name'
+            value={lastName}
+            name='lastName'
+            onChange={handleFieldChange}
+            aria-required="true"
+          />
+        </div>
+        <div>
+          <label htmlFor='email'>Email</label>
+          <input
+            id='email'
+            type='email'
+            placeholder='Email'
+            value={email}
+            name='email'
+            onChange={handleFieldChange}
+            aria-required="true"
+          />
+        </div>
+        <div>
+          <label htmlFor='message'>Message</label>
+          <textarea
+            id='message'
+            placeholder='Message'
+            value={message}
+            name='message'
+            onChange={handleFieldChange}
+            aria-required="true"
+          />
+        </div>
+        <div>
+          <button
+            type='submit'
+            disabled={!isFormValid}
+            aria-disabled={!isFormValid ? "true" : "false"}
+          >
+            Submit
+          </button>
+        </div>
+      </fieldset>
+    </form>
+  );
+};
+Changes made:
+
+I've destructured formState into firstName, lastName, email, and message variables to simplify the references to these values.
+I've also updated the aria-disabled attribute on the button to toggle between "true" and "false" depending on the form validity. This is an optional improvement for better accessibility compliance.
+According to the types for the aria attributes we don't need to pass a string, a simple boolean is fine, please change the code to reflect this
+ChatGPT
+Certainly! You can pass a boolean value directly to the aria-disabled attribute, as the type definitions for JSX in React allow either a string or a boolean for most aria-* attributes. Here's the updated code:
+
+jsx
+Copy code
+import React from 'react';
+import { updateForm } from './slices/formSlice';
+import { useAppDispatch, useAppSelector } from './store';
+import isEmail from 'validator/es/lib/isEmail';
+import isEmpty from 'validator/es/lib/isEmpty';
+import isLength from 'validator/es/lib/isLength';
+
+export const App: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const { firstName, lastName, email, message } = useAppSelector((state) => state.form);
+
+  const isFormValid = (
+    !isEmpty(firstName) &&
+    !isEmpty(lastName) &&
+    isEmail(email) &&
+    isLength(message, { min: 10 })
+  );
+
+  const handleFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    dispatch(updateForm({ [e.target.name]: e.target.value }));
+  };
+
+  return (
+    <form aria-labelledby="formTitle">
+      <h1 id="formTitle">Contact Form</h1>
+      <fieldset>
+        <div>
+          <label htmlFor='firstName'>First Name</label>
+          <input
+            id='firstName'
+            placeholder='First Name'
+            value={firstName}
+            name='firstName'
+            onChange={handleFieldChange}
+            aria-required={true}
+          />
+        </div>
+        <div>
+          <label htmlFor='lastName'>Last Name</label>
+          <input
+            id='lastName'
+            placeholder='Last Name'
+            value={lastName}
+            name='lastName'
+            onChange={handleFieldChange}
+            aria-required={true}
+          />
+        </div>
+        <div>
+          <label htmlFor='email'>Email</label>
+          <input
+            id='email'
+            type='email'
+            placeholder='Email'
+            value={email}
+            name='email'
+            onChange={handleFieldChange}
+            aria-required={true}
+          />
+        </div>
+        <div>
+          <label htmlFor='message'>Message</label>
+          <textarea
+            id='message'
+            placeholder='Message'
+            value={message}
+            name='message'
+            onChange={handleFieldChange}
+            aria-required={true}
+          />
+        </div>
+        <div>
+          <button
+            type='submit'
+            disabled={!isFormValid}
+            aria-disabled={!isFormValid}
+          >
+            Submit
+          </button>
+        </div>
+      </fieldset>
+    </form>
+  );
+};
+Changes made:
+
+Updated the aria-disabled attribute to accept a boolean value directly.
+refactor the code to only add the values to the redux store after they have been validated and submitted
+ChatGPT
+Certainly! If you want to update the Redux store only after the form is submitted and validated, you can maintain the form state locally within the component and then dispatch the updated form values to the Redux store upon successful validation and form submission. Here's how you can do it:
+
+jsx
+Copy code
+import React, { useState } from 'react';
+import { updateForm } from './slices/formSlice';
+import { useAppDispatch } from './store';
+import isEmail from 'validator/es/lib/isEmail';
+import isEmpty from 'validator/es/lib/isEmpty';
+import isLength from 'validator/es/lib/isLength';
+
+export const App: React.FC = () => {
+  const dispatch = useAppDispatch();
+  
+  const [localFormState, setLocalFormState] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    message: '',
+  });
+
+  const isFormValid = (
+    !isEmpty(localFormState.firstName) &&
+    !isEmpty(localFormState.lastName) &&
+    isEmail(localFormState.email) &&
+    isLength(localFormState.message, { min: 10 })
+  );
+
+  const handleFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setLocalFormState({
+      ...localFormState,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (isFormValid) {
+      dispatch(updateForm(localFormState));
+    }
+  };
+
+  return (
+    <form aria-labelledby="formTitle" onSubmit={handleSubmit}>
+      <h1 id="formTitle">Contact Form</h1>
+      <fieldset>
+        <div>
+          <label htmlFor='firstName'>First Name</label>
+          <input
+            id='firstName'
+            placeholder='First Name'
+            value={localFormState.firstName}
+            name='firstName'
+            onChange={handleFieldChange}
+            aria-required={true}
+          />
+        </div>
+        <div>
+          <label htmlFor='lastName'>Last Name</label>
+          <input
+            id='lastName'
+            placeholder='Last Name'
+            value={localFormState.lastName}
+            name='lastName'
+            onChange={handleFieldChange}
+            aria-required={true}
+          />
+        </div>
+        <div>
+          <label htmlFor='email'>Email</label>
+          <input
+            id='email'
+            type='email'
+            placeholder='Email'
+            value={localFormState.email}
+            name='email'
+            onChange={handleFieldChange}
+            aria-required={true}
+          />
+        </div>
+        <div>
+          <label htmlFor='message'>Message</label>
+          <textarea
+            id='message'
+            placeholder='Message'
+            value={localFormState.message}
+            name='message'
+            onChange={handleFieldChange}
+            aria-required={true}
+          />
+        </div>
+        <div>
+          <button
+            type='submit'
+            disabled={!isFormValid}
+            aria-disabled={!isFormValid}
+          >
+            Submit
+          </button>
+        </div>
+      </fieldset>
+    </form>
+  );
+};
+Changes made:
+
+Introduced localFormState and setLocalFormState to maintain the local form state.
+Modified the handleFieldChange function to update localFormState instead of the Redux state.
+Added a handleSubmit function that validates the form and dispatches an action to update the Redux store with the form data if the form is valid.
+Attached the handleSubmit function to the onSubmit event of the form element.
+This is the code now:
+
+import React, { useState } from 'react';
+import { updateForm } from './slices/formSlice';
+import { useAppDispatch } from './store';
+import isEmail from 'validator/es/lib/isEmail';
+import isEmpty from 'validator/es/lib/isEmpty';
+import isLength from 'validator/es/lib/isLength';
+
+export const App: React.FC = () => {
+  const dispatch = useAppDispatch();
+
+  const [localFormState, setLocalFormState] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    message: '',
+  });
+
+  const isFormValid =
+    !isEmpty(localFormState.firstName) &&
+    !isEmpty(localFormState.lastName) &&
+    isEmail(localFormState.email) &&
+    isLength(localFormState.message, { min: 10 });
+
+  const handleFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setLocalFormState({
+      ...localFormState,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (isFormValid) {
+      dispatch(updateForm(localFormState));
+    }
+  };
+
+  return (
+    <form aria-labelledby='formTitle' onSubmit={handleSubmit}>
+      <h1 id='formTitle'>Contact Form</h1>
+      <fieldset>
+        <div>
+          <label htmlFor='firstName'>First Name</label>
+          <input
+            id='firstName'
+            placeholder='First Name'
+            value={localFormState.firstName}
+            name='firstName'
+            onChange={handleFieldChange}
+            aria-required
+          />
+        </div>
+        <div>
+          <label htmlFor='lastName'>Last Name</label>
+          <input
+            id='lastName'
+            placeholder='Last Name'
+            value={localFormState.lastName}
+            name='lastName'
+            onChange={handleFieldChange}
+            aria-required
+          />
+        </div>
+        <div>
+          <label htmlFor='email'>Email</label>
+          <input
+            id='email'
+            type='email'
+            placeholder='Email'
+            value={localFormState.email}
+            name='email'
+            onChange={handleFieldChange}
+            aria-required
+          />
+        </div>
+        <div>
+          <label htmlFor='message'>Message</label>
+          <textarea
+            id='message'
+            placeholder='Message'
+            value={localFormState.message}
+            name='message'
+            onChange={handleFieldChange}
+            aria-required
+          />
+        </div>
+        <div>
+          <button
+            type='submit'
+            disabled={!isFormValid}
+            aria-disabled={!isFormValid}
+          >
+            Submit
+          </button>
+        </div>
+      </fieldset>
+    </form>
+  );
+};
+
+What would it look like if you used uncontrolled components?
+ChatGPT
+Using uncontrolled components means you'd let the DOM handle form state rather than keeping state within the React component. To achieve this, you'd generally use ref to directly interact with DOM elements. You'd also do validation in the form submit handler. Below is how the code would look with uncontrolled components:
+
+jsx
+Copy code
+import React, { useRef } from 'react';
+import { updateForm } from './slices/formSlice';
+import { useAppDispatch } from './store';
+import isEmail from 'validator/es/lib/isEmail';
+import isEmpty from 'validator/es/lib/isEmpty';
+import isLength from 'validator/es/lib/isLength';
+
+export const App: React.FC = () => {
+  const dispatch = useAppDispatch();
+
+  const firstNameRef = useRef(null);
+  const lastNameRef = useRef(null);
+  const emailRef = useRef(null);
+  const messageRef = useRef(null);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const firstName = firstNameRef.current.value;
+    const lastName = lastNameRef.current.value;
+    const email = emailRef.current.value;
+    const message = messageRef.current.value;
+
+    const isFormValid =
+      !isEmpty(firstName) &&
+      !isEmpty(lastName) &&
+      isEmail(email) &&
+      isLength(message, { min: 10 });
+
+    if (isFormValid) {
+      dispatch(updateForm({ firstName, lastName, email, message }));
+    }
+  };
+
+  return (
+    <form aria-labelledby='formTitle' onSubmit={handleSubmit}>
+      <h1 id='formTitle'>Contact Form</h1>
+      <fieldset>
+        <div>
+          <label htmlFor='firstName'>First Name</label>
+          <input
+            id='firstName'
+            placeholder='First Name'
+            ref={firstNameRef}
+            name='firstName'
+            aria-required
+          />
+        </div>
+        <div>
+          <label htmlFor='lastName'>Last Name</label>
+          <input
+            id='lastName'
+            placeholder='Last Name'
+            ref={lastNameRef}
+            name='lastName'
+            aria-required
+          />
+        </div>
+        <div>
+          <label htmlFor='email'>Email</label>
+          <input
+            id='email'
+            type='email'
+            placeholder='Email'
+            ref={emailRef}
+            name='email'
+            aria-required
+          />
+        </div>
+        <div>
+          <label htmlFor='message'>Message</label>
+          <textarea
+            id='message'
+            placeholder='Message'
+            ref={messageRef}
+            name='message'
+            aria-required
+          />
+        </div>
+        <div>
+          <button type='submit'>
+            Submit
+          </button>
+        </div>
+      </fieldset>
+    </form>
+  );
+};
+In this example:
+
+The useRef hook is used to get direct access to the DOM elements.
+The handleSubmit function captures form values directly from the DOM using these refs.
+Validation is done within handleSubmit, and if the form is valid, the Redux action is dispatched.
+Note: Since we are now using uncontrolled components, I removed the disabled attribute from the submit button. Normally, you would use server-side or subsequent client-side validations to handle any incorrect submissions.
+
+How do I install tailwind css in a create-react-app project?
+ChatGPT
+Installing Tailwind CSS in a Create React App (CRA) project involves several steps. Below are the instructions to install Tailwind CSS v2.x as of my last update in September 2021. Please note that Tailwind CSS might have released new versions after that, and you should check the official documentation for the most current instructions.
+
+Install Create React App (CRA) if you haven't:
+
+bash
+Copy code
+npx create-react-app my-tailwind-app
+Navigate into your project's directory:
+
+bash
+Copy code
+cd my-tailwind-app
+Install Tailwind via npm (or yarn):
+
+bash
+Copy code
+npm install tailwindcss
+Or, if you're using yarn:
+
+bash
+Copy code
+yarn add tailwindcss
+Initialize Tailwind to generate the tailwind.config.js file:
+
+bash
+Copy code
+npx tailwindcss init
+This will create a tailwind.config.js file at the root of your project.
+
+Configure Tailwind to remove unused styles in production:
+
+In your tailwind.config.js file:
+
+javascript
+Copy code
+module.exports = {
+  purge: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
+  darkMode: false,
+  theme: {
+    extend: {},
+  },
+  variants: {
+    extend: {},
+  },
+  plugins: [],
+}
+Create a new CSS file, e.g., src/tailwind.css, and import Tailwind directives into it:
+
+css
+Copy code
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+Add a build script to your package.json to generate your styles:
+
+json
+Copy code
+"scripts": {
+  "start": "react-scripts start",
+  "build": "react-scripts build && tailwindcss build src/tailwind.css -o src/index.css",
+  "eject": "react-scripts eject"
+},
+This will compile src/tailwind.css to src/index.css whenever you run npm run build.
+
+Import the generated CSS file in your src/index.js or src/index.tsx file:
+
+javascript
+Copy code
+import './index.css'; // If you generated the styles in src/index.css
+Start your project:
+
+bash
+Copy code
+npm start
+Or, if you're using yarn:
+
+bash
+Copy code
+yarn start
+Now you should have Tailwind CSS set up and working in your Create React App project. You can start using Tailwind classes in your components.
+
+This is the current code for the app:
+
+import React, { useState } from 'react';
+import { updateForm } from './slices/formSlice';
+import { useAppDispatch } from './store';
+import isEmail from 'validator/es/lib/isEmail';
+import isEmpty from 'validator/es/lib/isEmpty';
+import isLength from 'validator/es/lib/isLength';
+
+export const App: React.FC = () => {
+  const dispatch = useAppDispatch();
+
+  const [localFormState, setLocalFormState] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    message: '',
+  });
+
+  const { firstName, lastName, email, message } = localFormState;
+
+  const isFormValid =
+    !isEmpty(firstName) &&
+    !isEmpty(lastName) &&
+    isEmail(email) &&
+    isLength(message, { min: 10 });
+
+  const handleFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setLocalFormState({
+      ...localFormState,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (isFormValid) {
+      dispatch(updateForm(localFormState));
+    }
+  };
+
+  return (
+    <form aria-labelledby='formTitle' onSubmit={handleSubmit}>
+      <h1 id='formTitle'>Contact Form</h1>
+      <fieldset>
+        <div>
+          <label htmlFor='firstName'>First Name</label>
+          <input
+            id='firstName'
+            placeholder='First Name'
+            value={firstName}
+            name='firstName'
+            onChange={handleFieldChange}
+            aria-required
+          />
+        </div>
+        <div>
+          <label htmlFor='lastName'>Last Name</label>
+          <input
+            id='lastName'
+            placeholder='Last Name'
+            value={lastName}
+            name='lastName'
+            onChange={handleFieldChange}
+            aria-required
+          />
+        </div>
+        <div>
+          <label htmlFor='email'>Email</label>
+          <input
+            id='email'
+            type='email'
+            placeholder='Email'
+            value={email}
+            name='email'
+            onChange={handleFieldChange}
+            aria-required
+          />
+        </div>
+        <div>
+          <label htmlFor='message'>Message</label>
+          <textarea
+            id='message'
+            placeholder='Message'
+            value={message}
+            name='message'
+            onChange={handleFieldChange}
+            aria-required
+          />
+        </div>
+        <div>
+          <button
+            type='submit'
+            disabled={!isFormValid}
+            aria-disabled={!isFormValid}
+          >
+            Submit
+          </button>
+        </div>
+      </fieldset>
+    </form>
+  );
+};
+
+Please update it to add a modern and simple design to the form using tailwindcss
+ChatGPT
+Certainly! Here's how you could redesign your form using Tailwind CSS to give it a more modern and simple look:
+
+jsx
+Copy code
+import React, { useState } from 'react';
+import { updateForm } from './slices/formSlice';
+import { useAppDispatch } from './store';
+import isEmail from 'validator/es/lib/isEmail';
+import isEmpty from 'validator/es/lib/isEmpty';
+import isLength from 'validator/es/lib/isLength';
+
+export const App: React.FC = () => {
+  const dispatch = useAppDispatch();
+
+  const [localFormState, setLocalFormState] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    message: '',
+  });
+
+  const { firstName, lastName, email, message } = localFormState;
+
+  const isFormValid =
+    !isEmpty(firstName) &&
+    !isEmpty(lastName) &&
+    isEmail(email) &&
+    isLength(message, { min: 10 });
+
+  const handleFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setLocalFormState({
+      ...localFormState,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (isFormValid) {
+      dispatch(updateForm(localFormState));
+    }
+  };
+
+  return (
+    <form className="max-w-xl mx-auto p-4 bg-white rounded shadow-lg" aria-labelledby='formTitle' onSubmit={handleSubmit}>
+      <h1 id='formTitle' className="text-2xl font-semibold mb-4">Contact Form</h1>
+      <fieldset>
+        <div className="mb-4">
+          <label htmlFor='firstName' className="block text-sm font-semibold text-gray-600">First Name</label>
+          <input
+            id='firstName'
+            className="mt-1 p-2 w-full border rounded-md"
+            placeholder='First Name'
+            value={firstName}
+            name='firstName'
+            onChange={handleFieldChange}
+            aria-required
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor='lastName' className="block text-sm font-semibold text-gray-600">Last Name</label>
+          <input
+            id='lastName'
+            className="mt-1 p-2 w-full border rounded-md"
+            placeholder='Last Name'
+            value={lastName}
+            name='lastName'
+            onChange={handleFieldChange}
+            aria-required
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor='email' className="block text-sm font-semibold text-gray-600">Email</label>
+          <input
+            id='email'
+            type='email'
+            className="mt-1 p-2 w-full border rounded-md"
+            placeholder='Email'
+            value={email}
+            name='email'
+            onChange={handleFieldChange}
+            aria-required
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor='message' className="block text-sm font-semibold text-gray-600">Message</label>
+          <textarea
+            id='message'
+            className="mt-1 p-2 w-full h-32 border rounded-md"
+            placeholder='Message'
+            value={message}
+            name='message'
+            onChange={handleFieldChange}
+            aria-required
+          />
+        </div>
+        <div>
+          <button
+            type='submit'
+            className={`py-2 px-4 bg-blue-500 text-white rounded-md ${!isFormValid && 'opacity-50 cursor-not-allowed'}`}
+            disabled={!isFormValid}
+            aria-disabled={!isFormValid}
+          >
+            Submit
+          </button>
+        </div>
+      </fieldset>
+    </form>
+  );
+};
+Here are some of the design choices made using Tailwind CSS classes:
+
+Centered form container with rounded corners and shadow.
+Spacing between form groups.
+Padding inside the input fields and textarea.
+A more noticeable font size for the form title.
+These are just some of the possibilities! You can further customize this according to your needs.
+
+This is the code now:
+
+import React, { useState } from 'react';
+import { updateForm } from './slices/formSlice';
+import { useAppDispatch } from './store';
+import isEmail from 'validator/es/lib/isEmail';
+import isEmpty from 'validator/es/lib/isEmpty';
+import isLength from 'validator/es/lib/isLength';
+
+const allowedFields = new Set(['firstName', 'lastName', 'email', 'message']);
+
+export const App: React.FC = () => {
+  const dispatch = useAppDispatch();
+
+  const [localFormState, setLocalFormState] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    message: '',
+  });
+
+  const { firstName, lastName, email, message } = localFormState;
+
+  const isFormValid =
+    !isEmpty(firstName) &&
+    !isEmpty(lastName) &&
+    isEmail(email) &&
+    isLength(message, { min: 10 });
+
+  const handleFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    if (!allowedFields.has(e.target.name)) return;
+
+    setLocalFormState({
+      ...localFormState,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (isFormValid) {
+      dispatch(updateForm(localFormState));
+    }
+  };
+
+  return (
+    <form
+      className='max-w-xl mx-auto p-4 bg-white rounded shadow-lg'
+      aria-labelledby='formTitle'
+      onSubmit={handleSubmit}
+    >
+      <h1 id='formTitle' className='text-2xl font-semibold mb-4'>
+        Contact Form
+      </h1>
+      <fieldset>
+        <div className='mb-4'>
+          <label
+            htmlFor='firstName'
+            className='block text-sm font-semibold text-gray-600'
+          >
+            First Name
+          </label>
+          <input
+            id='firstName'
+            className='mt-1 p-2 w-full border rounded-md'
+            placeholder='First Name'
+            value={firstName}
+            name='firstName'
+            onChange={handleFieldChange}
+            aria-required
+          />
+        </div>
+        <div className='mb-4'>
+          <label
+            htmlFor='lastName'
+            className='block text-sm font-semibold text-gray-600'
+          >
+            Last Name
+          </label>
+          <input
+            id='lastName'
+            className='mt-1 p-2 w-full border rounded-md'
+            placeholder='Last Name'
+            value={lastName}
+            name='lastName'
+            onChange={handleFieldChange}
+            aria-required
+          />
+        </div>
+        <div className='mb-4'>
+          <label
+            htmlFor='email'
+            className='block text-sm font-semibold text-gray-600'
+          >
+            Email
+          </label>
+          <input
+            id='email'
+            type='email'
+            className='mt-1 p-2 w-full border rounded-md'
+            placeholder='Email'
+            value={email}
+            name='email'
+            onChange={handleFieldChange}
+            aria-required
+          />
+        </div>
+        <div className='mb-4'>
+          <label
+            htmlFor='message'
+            className='block text-sm font-semibold text-gray-600'
+          >
+            Message
+          </label>
+          <textarea
+            id='message'
+            className='mt-1 p-2 w-full h-32 border rounded-md'
+            placeholder='Message'
+            value={message}
+            name='message'
+            onChange={handleFieldChange}
+            aria-required
+          />
+        </div>
+        <div>
+          <button
+            type='submit'
+            className={`py-2 px-4 bg-blue-500 text-white rounded-md ${
+              !isFormValid && 'opacity-50 cursor-not-allowed'
+            }`}
+            disabled={!isFormValid}
+            aria-disabled={!isFormValid}
+          >
+            Submit
+          </button>
+        </div>
+      </fieldset>
+    </form>
+  );
+};
+
+Update the tailwind styles to follow a dark color scheme, also give me the classess for a nice minimalistic background for the whole page
+ChatGPT
+Certainly! You can use Tailwind CSS to create a dark-themed form and add a minimalistic background to the entire page. Below is your updated code with the dark theme:
+
+jsx
+Copy code
+import React, { useState } from 'react';
+import { updateForm } from './slices/formSlice';
+import { useAppDispatch } from './store';
+import isEmail from 'validator/es/lib/isEmail';
+import isEmpty from 'validator/es/lib/isEmpty';
+import isLength from 'validator/es/lib/isLength';
+
+const allowedFields = new Set(['firstName', 'lastName', 'email', 'message']);
+
+export const App: React.FC = () => {
+  const dispatch = useAppDispatch();
+
+  const [localFormState, setLocalFormState] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    message: '',
+  });
+
+  const { firstName, lastName, email, message } = localFormState;
+
+  const isFormValid =
+    !isEmpty(firstName) &&
+    !isEmpty(lastName) &&
+    isEmail(email) &&
+    isLength(message, { min: 10 });
+
+  const handleFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    if (!allowedFields.has(e.target.name)) return;
+
+    setLocalFormState({
+      ...localFormState,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (isFormValid) {
+      dispatch(updateForm(localFormState));
+    }
+  };
+
+  return (
+    <div className="bg-gray-900 text-white min-h-screen">
+      <form
+        className='max-w-xl mx-auto p-4 bg-gray-800 rounded shadow-lg'
+        aria-labelledby='formTitle'
+        onSubmit={handleSubmit}
+      >
+        <h1 id='formTitle' className='text-2xl font-semibold mb-4 text-white'>
+          Contact Form
+        </h1>
+        <fieldset>
+          <div className='mb-4'>
+            <label
+              htmlFor='firstName'
+              className='block text-sm font-semibold text-gray-300'
+            >
+              First Name
+            </label>
+            <input
+              id='firstName'
+              className='mt-1 p-2 w-full border rounded-md bg-gray-700 text-white'
+              placeholder='First Name'
+              value={firstName}
+              name='firstName'
+              onChange={handleFieldChange}
+              aria-required
+            />
+          </div>
+          <div className='mb-4'>
+            <label
+              htmlFor='lastName'
+              className='block text-sm font-semibold text-gray-300'
+            >
+              Last Name
+            </label>
+            <input
+              id='lastName'
+              className='mt-1 p-2 w-full border rounded-md bg-gray-700 text-white'
+              placeholder='Last Name'
+              value={lastName}
+              name='lastName'
+              onChange={handleFieldChange}
+              aria-required
+            />
+          </div>
+          <div className='mb-4'>
+            <label
+              htmlFor='email'
+              className='block text-sm font-semibold text-gray-300'
+            >
+              Email
+            </label>
+            <input
+              id='email'
+              type='email'
+              className='mt-1 p-2 w-full border rounded-md bg-gray-700 text-white'
+              placeholder='Email'
+              value={email}
+              name='email'
+              onChange={handleFieldChange}
+              aria-required
+            />
+          </div>
+          <div className='mb-4'>
+            <label
+              htmlFor='message'
+              className='block text-sm font-semibold text-gray-300'
+            >
+              Message
+            </label>
+            <textarea
+              id='message'
+              className='mt-1 p-2 w-full h-32 border rounded-md bg-gray-700 text-white'
+              placeholder='Message'
+              value={message}
+              name='message'
+              onChange={handleFieldChange}
+              aria-required
+            />
+          </div>
+          <div>
+            <button
+              type='submit'
+              className={`py-2 px-4 bg-blue-600 text-white rounded-md ${
+                !isFormValid && 'opacity-50 cursor-not-allowed'
+              }`}
+              disabled={!isFormValid}
+              aria-disabled={!isFormValid}
+            >
+              Submit
+            </button>
+          </div>
+        </fieldset>
+      </form>
+    </div>
+  );
+};
+Here are the updates made:
+
+Changed the background color for the whole page to a dark shade (bg-gray-900 for the wrapper div).
+Modified the form container to have a darker background (bg-gray-800).
+Changed the text colors to lighter shades for better contrast (text-white or text-gray-300).
+This should give you a nice, modern, dark-themed contact form!
+
+Now move the form to the center of the screen enough to make it look good
+ChatGPT
+Certainly! To vertically and horizontally center the form on the screen, you can use Flexbox or Grid utilities that Tailwind provides. Here, I've used Flexbox to achieve the centered layout.
+
+Here's the updated code:
+
+jsx
+Copy code
+import React, { useState } from 'react';
+import { updateForm } from './slices/formSlice';
+import { useAppDispatch } from './store';
+import isEmail from 'validator/es/lib/isEmail';
+import isEmpty from 'validator/es/lib/isEmpty';
+import isLength from 'validator/es/lib/isLength';
+
+const allowedFields = new Set(['firstName', 'lastName', 'email', 'message']);
+
+export const App: React.FC = () => {
+  const dispatch = useAppDispatch();
+
+  const [localFormState, setLocalFormState] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    message: '',
+  });
+
+  const { firstName, lastName, email, message } = localFormState;
+
+  const isFormValid =
+    !isEmpty(firstName) &&
+    !isEmpty(lastName) &&
+    isEmail(email) &&
+    isLength(message, { min: 10 });
+
+  const handleFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    if (!allowedFields.has(e.target.name)) return;
+
+    setLocalFormState({
+      ...localFormState,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (isFormValid) {
+      dispatch(updateForm(localFormState));
+    }
+  };
+
+  return (
+    <div className="bg-gray-900 text-white min-h-screen flex items-center justify-center">
+      <form
+        className='max-w-xl p-4 bg-gray-800 rounded shadow-lg'
+        aria-labelledby='formTitle'
+        onSubmit={handleSubmit}
+      >
+        {/* Existing form content remains unchanged */}
+      </form>
+    </div>
+  );
+};
+The key changes are in the wrapper div around the form. I've added the classes flex, items-center, and justify-center to vertically and horizontally center the child elements. I've also made sure to use min-h-screen to ensure the background takes up the full height of the screen.
+
+This should place your form right in the center of the screen and make it look good!
+
+I don't want it fully centered, I want it a bit closer to the top, also the form got squished
+ChatGPT
+Ah, I see. If you want the form to be closer to the top and not completely centered, you can use Tailwind's mt- (margin-top) utility to adjust its position. And to prevent the form from getting squished, you can specify a minimum width.
+
+Here's the updated code:
+
+jsx
+Copy code
+import React, { useState } from 'react';
+import { updateForm } from './slices/formSlice';
+import { useAppDispatch } from './store';
+import isEmail from 'validator/es/lib/isEmail';
+import isEmpty from 'validator/es/lib/isEmpty';
+import isLength from 'validator/es/lib/isLength';
+
+const allowedFields = new Set(['firstName', 'lastName', 'email', 'message']);
+
+export const App: React.FC = () => {
+  const dispatch = useAppDispatch();
+
+  const [localFormState, setLocalFormState] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    message: '',
+  });
+
+  const { firstName, lastName, email, message } = localFormState;
+
+  const isFormValid =
+    !isEmpty(firstName) &&
+    !isEmpty(lastName) &&
+    isEmail(email) &&
+    isLength(message, { min: 10 });
+
+  const handleFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    if (!allowedFields.has(e.target.name)) return;
+
+    setLocalFormState({
+      ...localFormState,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (isFormValid) {
+      dispatch(updateForm(localFormState));
+    }
+  };
+
+  return (
+    <div className="bg-gray-900 text-white min-h-screen flex flex-col justify-start items-center pt-20">
+      <form
+        className='max-w-xl w-full p-4 bg-gray-800 rounded shadow-lg'
+        aria-labelledby='formTitle'
+        onSubmit={handleSubmit}
+      >
+        {/* Existing form content remains unchanged */}
+      </form>
+    </div>
+  );
+};
+Here's a breakdown of the changes:
+
+I added flex flex-col classes to the div to set up a flexbox container. The justify-start class aligns the form closer to the top of the flex container.
+I used pt-20 (padding-top: 5rem) on the flex container to move the form closer to the top of the screen.
+To prevent the form from getting squished, I added w-full to the form element, which will make it take up the full width of the flex container up to a maximum width of max-w-xl.
+This should place the form closer to the top and prevent it from getting squished.
+
+Give me some css for a nice font to replace this:
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+ChatGPT
+Sure, a popular choice for web typography is Google Fonts, which provides a wide array of high-quality fonts. Here are some CSS rules you could use to integrate a Google Font into your project. In this example, I'll use the font "Poppins" for the main text and "Fira Code" for code snippets:
+
+First, include these lines in your HTML <head> tag to import the Google Fonts. Alternatively, you can also include them at the top of your CSS file:
+
+html
+Copy code
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+Now you can adjust your CSS like this:
+
+css
+Copy code
+body {
+  margin: 0;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+    'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: 'Fira Code', source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+This CSS code will use "Poppins" as the default font and will fall back to the other fonts listed if "Poppins" is not available. For code, it will use "Fira Code" and fall back to other monospace fonts.
