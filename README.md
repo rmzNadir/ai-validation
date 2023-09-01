@@ -1,46 +1,68 @@
-# Getting Started with Create React App
+# Validation Project
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Description
 
-## Available Scripts
+This project serves as a React-based application designed to handle and validate contact requests. Users can fill out a form to send contact requests which are then stored and displayed in a table. The project leverages TypeScript for type-checking and relies on Redux for state management. Additionally, it features Tailwind CSS for styling, React Testing Library for testing, and Validator for form validation. The project also utilizes ChatGPT for automated tasks and data interpretation.
 
-In the project directory, you can run:
+## Technology Stack
 
-### `npm start`
+- React
+- TypeScript
+- Redux Toolkit
+- Validator
+- Tailwind CSS
+- Jest and React Testing Library for testing
+- ChatGPT-4
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Installation and Running Locally
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### Prerequisites
 
-### `npm test`
+Ensure that you have Node.js and npm installed on your machine.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Steps
 
-### `npm run build`
+1. **Clone the repository**
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+   ```bash
+   git clone https://github.com/rmzNadir/ai-validation
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+2. **Navigate to the project directory**
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+   ```bash
+   cd ai-project
+   ```
 
-### `npm run eject`
+3. **Install dependencies**  
+   Run the following command to install all the required dependencies listed in the `package.json` file.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+   ```bash
+   npm install
+   ```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+4. **Start the development server**  
+   Use the following command to start the local development server.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+   ```bash
+   npm start
+   ```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+5. **Access the application**  
+   Open your browser and go to `http://localhost:3000/` to see the application running.
 
-## Learn More
+6. **Run tests (optional)**  
+   To run the tests configured, you can use the following command.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+   ```bash
+   npm test
+   ```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+7. **Check code coverage (optional)**  
+    To check the test coverage, you can use the following command.
+
+   ```bash
+   npm run test a -- --coverage
+   ```
+
+That's it! You should now have the project running locally.

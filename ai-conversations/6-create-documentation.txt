@@ -1,0 +1,341 @@
+I need you to write me a README.md file based on the next files, please only include relevant information regarding the project, the technology used (also mention yourself), and how to get it running, I expect to have a description with 2 paragraphs and maximum 10 sentences, also add a guide with steps on how to install and run this locally:
+
+package.json:
+
+{
+  "name": "validation-project",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@reduxjs/toolkit": "^1.9.5",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.46",
+    "@types/react": "^18.2.21",
+    "@types/react-dom": "^18.2.7",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.1.2",
+    "react-scripts": "5.0.1",
+    "typescript": "^4.9.5",
+    "validator": "^13.11.0",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "coverage": "react-scripts test --coverage",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "jest": {
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/src/index.tsx"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/validator": "^13.11.1",
+    "tailwindcss": "^3.3.3"
+  }
+}
+
+contactRequestsSlice:
+
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
+export interface ContactRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  message: string;
+}
+
+const initialState: ContactRequest[] = [];
+
+export const contactRequestsSlice = createSlice({
+  name: 'contactRequests',
+  initialState,
+  reducers: {
+    addContactRequest: (state, action: PayloadAction<ContactRequest>) => {
+      state.push(action.payload);
+    },
+  },
+});
+
+export const { addContactRequest } = contactRequestsSlice.actions;
+
+export const { reducer: contactRequestsReducer } = contactRequestsSlice;
+
+ContactRequests.tsx:
+
+import { FC } from 'react';
+import { useAppSelector } from '../../redux/store';
+
+export const ContactRequests: FC = () => {
+  const contactRequests = useAppSelector((state) => state.contactRequests);
+
+  if (!contactRequests.length) return null;
+
+  return (
+    <div className='max-w-fit w-full p-4 bg-gray-800 rounded shadow-lg mt-10 overflow-x-auto'>
+      <h2 className='text-2xl font-semibold mb-4 text-white'>
+        Contact Requests
+      </h2>
+      <div className='overflow-x-auto'>
+        <table className='min-w-full bg-gray-700 text-white rounded-md divide-y divide-gray-600'>
+          <thead>
+            <tr>
+              <th className='px-4 py-2'>First Name</th>
+              <th className='px-4 py-2'>Last Name</th>
+              <th className='px-4 py-2'>Email</th>
+              <th className='px-4 py-2'>Message</th>
+            </tr>
+          </thead>
+          <tbody className='divide-y divide-gray-600'>
+            {contactRequests.map(({ firstName, lastName, email, message }) => (
+              <tr key={email}>
+                <td className='px-4 py-2'>{firstName}</td>
+                <td className='px-4 py-2'>{lastName}</td>
+                <td className='px-4 py-2'>{email}</td>
+                <td className='px-4 py-2'>{message}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+ContactRequestForm.tsx:
+
+import { FC, useState } from 'react';
+import { addContactRequest } from '../../redux/slices/contactRequestsSlice/contactRequestsSlice';
+import { useAppDispatch } from '../../redux/store';
+import isEmail from 'validator/lib/isEmail';
+import isEmpty from 'validator/lib/isEmpty';
+import isLength from 'validator/lib/isLength';
+
+const initialState = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  message: '',
+};
+
+const allowedFields = new Set(['firstName', 'lastName', 'email', 'message']);
+
+export const ContactRequestForm: FC = () => {
+  const dispatch = useAppDispatch();
+
+  const [contactRequest, setContactRequest] = useState(initialState);
+
+  const { firstName, lastName, email, message } = contactRequest;
+
+  const isFormValid =
+    !isEmpty(firstName) &&
+    !isEmpty(lastName) &&
+    isEmail(email) &&
+    isLength(message, { min: 10 });
+
+  const handleFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    if (!allowedFields.has(e.target.name)) return;
+
+    setContactRequest((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (isFormValid) {
+      dispatch(addContactRequest(contactRequest));
+      setContactRequest(initialState);
+    }
+  };
+
+  return (
+    <form
+      className='max-w-xl w-full p-4 bg-gray-800 rounded shadow-lg'
+      aria-labelledby='formTitle'
+      onSubmit={handleSubmit}
+    >
+      <h1 id='formTitle' className='text-2xl font-semibold mb-4 text-white'>
+        Contact Form
+      </h1>
+      <fieldset>
+        <div className='mb-4'>
+          <label
+            htmlFor='firstName'
+            className='block text-sm font-semibold text-gray-300'
+          >
+            First Name
+          </label>
+          <input
+            id='firstName'
+            className='mt-1 p-2 w-full border rounded-md bg-gray-700 text-white'
+            placeholder='John'
+            value={firstName}
+            name='firstName'
+            onChange={handleFieldChange}
+            aria-required
+          />
+        </div>
+        <div className='mb-4'>
+          <label
+            htmlFor='lastName'
+            className='block text-sm font-semibold text-gray-300'
+          >
+            Last Name
+          </label>
+          <input
+            id='lastName'
+            className='mt-1 p-2 w-full border rounded-md bg-gray-700 text-white'
+            placeholder='Doe'
+            value={lastName}
+            name='lastName'
+            onChange={handleFieldChange}
+            aria-required
+          />
+        </div>
+        <div className='mb-4'>
+          <label
+            htmlFor='email'
+            className='block text-sm font-semibold text-gray-300'
+          >
+            Email
+          </label>
+          <input
+            id='email'
+            type='email'
+            className='mt-1 p-2 w-full border rounded-md bg-gray-700 text-white'
+            placeholder='johndoe@example.com'
+            value={email}
+            name='email'
+            onChange={handleFieldChange}
+            aria-required
+          />
+        </div>
+        <div className='mb-4'>
+          <label
+            htmlFor='message'
+            className='block text-sm font-semibold text-gray-300'
+          >
+            Message
+          </label>
+          <textarea
+            id='message'
+            className='mt-1 p-2 w-full h-32 border rounded-md bg-gray-700 text-white'
+            placeholder='Say anything!'
+            value={message}
+            name='message'
+            onChange={handleFieldChange}
+            aria-required
+          />
+        </div>
+        <div>
+          <button
+            type='submit'
+            className={`py-2 px-4 bg-blue-600 text-white rounded-md ${
+              !isFormValid && 'opacity-50 cursor-not-allowed'
+            }`}
+            disabled={!isFormValid}
+            aria-disabled={!isFormValid}
+          >
+            Submit
+          </button>
+        </div>
+      </fieldset>
+    </form>
+  );
+};
+
+redux-store.ts:
+
+import { configureStore } from '@reduxjs/toolkit';
+import { contactRequestsReducer } from './slices/contactRequestsSlice/contactRequestsSlice';
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+
+export const store = configureStore({
+  reducer: {
+    contactRequests: contactRequestsReducer,
+  },
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+
+export const useAppDispatch: () => AppDispatch = useDispatch;
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+ChatGPT
+Validation Project README
+Description
+This project serves as a React-based application designed to handle and validate contact requests. Users can fill out a form to send contact requests which are then stored and displayed in a table. The project leverages TypeScript for type-checking and relies on Redux for state management. Additionally, it features Tailwind CSS for styling, React Testing Library for testing, and Validator for form validation.
+
+Technology Stack
+React v18.2.0
+TypeScript v4.9.5
+Redux Toolkit v1.9.5
+Validator v13.11.0
+Tailwind CSS v3.3.3
+Jest and React Testing Library for testing
+The project also utilizes ChatGPT for automated tasks and data interpretation.
+
+Installation and Running Locally
+Prerequisites
+Ensure that you have Node.js and npm installed on your machine.
+
+Steps
+Clone the repository
+
+bash
+Copy code
+git clone https://github.com/your-repo/validation-project.git
+Navigate to the project directory
+
+bash
+Copy code
+cd validation-project
+Install dependencies
+Run the following command to install all the required dependencies listed in the package.json file.
+
+bash
+Copy code
+npm install
+Start the development server
+Use the following command to start the local development server.
+
+bash
+Copy code
+npm start
+Access the application
+Open your browser and go to http://localhost:3000/ to see the application running.
+
+Run tests (optional)
+To run the tests configured, you can use the following command.
+
+bash
+Copy code
+npm test
+That's it! You should now have the project running locally.
