@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface ContactRequest {
+export interface ContactRequest {
   firstName: string;
   lastName: string;
   email: string;

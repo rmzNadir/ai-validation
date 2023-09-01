@@ -1,9 +1,9 @@
 import { FC, useState } from 'react';
-import { addContactRequest } from './slices/contactRequestsSlice';
-import { useAppDispatch } from './store';
-import isEmail from 'validator/es/lib/isEmail';
-import isEmpty from 'validator/es/lib/isEmpty';
-import isLength from 'validator/es/lib/isLength';
+import { addContactRequest } from '../../redux/slices/contactRequestsSlice/contactRequestsSlice';
+import { useAppDispatch } from '../../redux/store';
+import isEmail from 'validator/lib/isEmail';
+import isEmpty from 'validator/lib/isEmpty';
+import isLength from 'validator/lib/isLength';
 
 const initialState = {
   firstName: '',

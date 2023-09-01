@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { contactRequestsReducer } from './slices/contactRequestsSlice';
+import { contactRequestsReducer } from './slices/contactRequestsSlice/contactRequestsSlice';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 
 export const store = configureStore({

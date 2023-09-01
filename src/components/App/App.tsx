@@ -1,6 +1,6 @@
 import { FC } from 'react';
-import { ContactRequestForm } from './ContactRequestForm';
-import { ContactRequests } from './ContactRequests';
+import { ContactRequestForm } from '../ContactRequestForm/ContactRequestForm';
+import { ContactRequests } from '../ContactRequests/ContactRequests';
 
 export const App: FC = () => {
   return (

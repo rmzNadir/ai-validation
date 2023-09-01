@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { useAppSelector } from './store';
+import { useAppSelector } from '../../redux/store';
 
 export const ContactRequests: FC = () => {
   const contactRequests = useAppSelector((state) => state.contactRequests);
