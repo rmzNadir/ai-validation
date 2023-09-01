@@ -1,10 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
-import formReducer from './slices/formSlice';
+import { contactRequestsReducer } from './slices/contactRequestsSlice';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 
 export const store = configureStore({
   reducer: {
-    form: formReducer,
+    contactRequests: contactRequestsReducer,
   },
 });
 
